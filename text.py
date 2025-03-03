@@ -74,3 +74,74 @@ class PetDataset:
             pandas DataFrame with columns: image_path, emotion, pet_type
         """
         data = []
+
+ for emotion_folder in self.emotion_folders:
+            emotion = emotion_folder.name
+            for ext in ['.jpg', '.jpeg', '.png']:
+                image_files = list(emotion_folder.glob(f'*{ext}')) + list(emotion_folder.glob(f'*{ext.upper()}'))
+                
+                for img_path in image_files:
+                    try:
+                        # Load and classify image
+                        image = self.load_image(img_path)
+                        pet_type = self.classify_pet(image)
+                        
+                        data.append({
+                            'image_path': str(img_path),
+                            'emotion': emotion,
+                            'pet_type': pet_type
+                        })
+                    except Exception as e:
+                        print(f"Error processing {img_path}: {e}")
+        
+        df = pd.DataFrame(data)
+        print(f"\nFound {len(df)} total images:")
+        print("\nPet type distribution:")
+        print(df['pet_type'].value_counts())
+        print("\nEmotion distribution:")
+        for emotion in df['emotion'].unique():
+            count = len(df[df['emotion'] == emotion])
+            print(f"{emotion}: {count} images")
+            
+        return df
+    
+    def load_image(self, image_path):
+        """
+        Load and return an image
+        Args:
+            image_path (str): Path to the image file
+        Returns:
+            PIL Image object
+        """
+        return Image.open(image_path).convert('RGB')
+
+def main():
+    dataset_path = r"C:\Users\pradeep\Downloads\pets_faces"
+    
+    try:
+        print("Initializing pet dataset and loading model...")
+        pet_dataset = PetDataset(dataset_path)
+        
+        print("\nProcessing images...")
+        df = pet_dataset.load_dataset()
+        
+        print(f"\nTotal number of images: {len(df)}")
+        print("\nPet type and emotion distribution:")
+        print(pd.crosstab(df['pet_type'], df['emotion']))
+        
+        # Example: Load and analyze first image
+        if len(df) > 0:
+            first_image = pet_dataset.load_image(df.iloc[0]['image_path'])
+            first_emotion = df.iloc[0]['emotion']
+            first_pet_type = df.iloc[0]['pet_type']
+            print(f"\nFirst image details:")
+            print(f"Pet Type: {first_pet_type}")
+            print(f"Emotion: {first_emotion}")
+            print(f"Size: {first_image.size}")
+            
+    except Exception as e:
+        print(f"Error: {e}")
+
+if __name__ == "__main__":
+    main()
+
