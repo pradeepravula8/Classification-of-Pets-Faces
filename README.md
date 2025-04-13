@@ -53,8 +53,7 @@ Classify pet types using ResNet50.
 Output a summary of pet type distribution per emotion.
 
 
-Notes
-
+Key Points:
 The script filters images by checking for pet-related categories in the ResNet50 classification output.
 
 If an image does not belong to known pet classes (dog, cat, rabbit, etc.), it is labeled as "Other".
